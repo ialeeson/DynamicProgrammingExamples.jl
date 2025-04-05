@@ -1,0 +1,13 @@
+name = "DynamicProgrammingExamples"
+uuid = "ec18ebbb-5983-4057-999b-4b851b7ab46d"
+authors = ["Isaac Leeson <isaacleeson@proton.me> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
