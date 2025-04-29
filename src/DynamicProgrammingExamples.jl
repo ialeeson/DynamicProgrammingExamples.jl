@@ -1,5 +1,6 @@
 module DynamicProgrammingExamples
 
-# Write your package code here.
+include("rbc.jl")
+include("cake_eating_problem.jl")
 
 end

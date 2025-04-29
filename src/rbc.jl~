@@ -1,0 +1,49 @@
+module RBC
+
+using DynamicProgrammingGPU
+
+@kwdef struct Parameters{F,I,N} <: ModelParameters
+    β::F = 0.984
+    δ::F = 0.01
+    α::F = 0.35
+    γ::F = 1.2
+    ρ::F = 0.95
+    σ::F = 0.005
+    m_quad::I = 3
+    n_quad::I = 4
+    quadrature::Quadrature{N,F} = DynamicProgrammingGPU.init(Tauchen(ρ, σ, m_quad, n_quad))
+    min::NTuple{N,F} = convert.((F,),(0.0, minimum(quadrature.nodes)))
+    max::NTuple{N,F} = convert.((F,),(10.0, maximum(quadrature.nodes)))
+end
+
+c(u,s,i,p) = exp(s[2])*s[1]^p.α + (one(s[1])-p.δ)*s[1] - u[1]
+function f(u,s,i,v,p)
+    nodes = p.quadrature.nodes
+    weights = p.quadrature.weights[i[2]]
+    expV = zero(u[1])
+    for j in eachindex(nodes)
+        expV += weights[j] * v(u[1], nodes[j])
+    end
+    utility(c(u,s,i,p),  p) + p.β * expV
+end
+bounds(b,s,i,v,p) = (zero(s[1]), exp(s[2])*s[1]^p.α + (one(s[1])-p.δ)*s[1])
+utility(c,p) = max(c^(1-p.γ)/(1-p.γ), -10*one(c))
+v0(s,p) = utility(s[1],p)
+
+function init(p,n)
+
+    grid = Grid(p.min, p.max, (n,p.n_quad))
+    prob = ValueFunction(
+        UnivariateOptimizationProblem(
+            f,
+            bounds,
+            GoldenSection(),
+        ),
+        Val(3),
+    )
+    DynamicProgrammingGPU.init(prob, grid, Base.Fix2(v0, p))
+    
+end
+
+end
+
