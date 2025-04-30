@@ -15,22 +15,22 @@ function push_time!(t, name, n, nsteps)
         setup = (
             p = getproperty(eval($name), :Parameters)();
             x = getproperty(eval($name), :init)(p,$n);
-            p_cuda = mtl(p);
-            x_cuda = mtl(x)
+            p_cuda = cu(p);
+            x_cuda = cu(x)
         )
     )
-    # tex = @belapsed(solve!(x_tex, p_tex),
-    #     setup = (
-    #         p = getproperty(eval($name), :Parameters)();
-    #         x = getproperty(eval($name), :init)(p,$n);
-    #         p_tex = mtl(p);
-    #         x_tex = mtl(x)
-    #     )
-    # )
+    tex = @belapsed(solve!(x_tex, p_tex),
+        setup = (
+            p = getproperty(eval($name), :Parameters)();
+            x = getproperty(eval($name), :init)(p,$n);
+            p_tex = cu(p);
+            x_tex = cu(x)
+        )
+    )
     push!(t, (; name, n, cpu, gpu))
 end
 
-t = DataFrame(name = Symbol[], n = Tuple[], cpu = Float64[], gpu = Float64[])
+t = DataFrame(name = Symbol[], n = Tuple[], cpu = Float64[], gpu = Float64[], tex = Float64[])
 [push_time!(t, name, (n,), 10^2) for n in 32 .* 2 .^ (0:5),
     name in (:CP,)]
 [push_time!(t, name, (n,m), 10^2) for n in 32 .* 2 .^ (0:5), m in (8,),
