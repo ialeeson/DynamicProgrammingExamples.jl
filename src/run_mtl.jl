@@ -27,3 +27,4 @@ t = DataFrame(name = Symbol[], n = Tuple[], cpu = Float64[], gpu = Float64[])
     name in (:CP,)]
 [push_time!(t, name, (n,m), 10^2) for n in 32 .* 2 .^ (0:5), m in (8,),
     name in (:RBC,)]
+t
