@@ -9,17 +9,17 @@ using DynamicProgrammingGPU
     γ::F = 1.2
     ρ::F = 0.95
     σ::F = 0.005
-    min::F = 1e-10
-    max::F = 1e2
+    min::F = 1e-3
+    max::F = 1e3
 end
 
 c(u,s,p) = (one(s[1])-p.δ)*s[1] - u[1] + exp(s[2]) * s[1]^p.α
 f(u,s,v,p) = ((1-p.β) * c(u,s,p)^(1-p.γ) + p.β * v(u[1])^(1-p.γ))^(1/(1-p.γ))
 bounds(b,s,v,p) = (
     zero(s[1]),
-    (one(s[1])-p.δ)*s[1] + exp(s[2]) * s[1]^p.α - 1f-5
+    (one(s[1])-p.δ)*s[1] + exp(s[2]) * s[1]^p.α - 1f-10
 )
-v0(s,p) = ((s[1])^(1-p.γ) + one(p.γ))^(1/(1-p.γ))
+v0(s,p) = ((s[1])^(1-p.γ))^(1/(1-p.γ))
 
 function init(p, n; m=3)
     
