@@ -3,24 +3,23 @@ module RBCPrecompute
 using DynamicProgrammingGPU
 
 @kwdef struct Parameters{F} <: ModelParameters
-    β::F = 0.984
+    β::F = 0.99
     δ::F = 0.01
     α::F = 0.35
     γ::F = 1.2
     ρ::F = 0.95
     σ::F = 0.005
-    min::F = 1e-5
-    max::F = 10.0
+    min::F = 1e-10
+    max::F = 1e2
 end
 
 c(u,s,p) = exp(s[2])*s[1]^p.α + (one(s[1])-p.δ)*s[1] - u[1]
-f(u,s,v,p) = utility(c(u,s,p),p) + p.β * v(u[1])
+f(u,s,v,p) = ((1-p.β) * c(u,s,p)^(1-p.γ) + p.β * v(u[1])^(1-p.γ))^(1/(1-p.γ))
 bounds(b,s,v,p) = (
     zero(s[1]),
-    exp(s[2])*s[1]^p.α + (one(s[1])-p.δ)*s[1] - 1f-5
+    (one(s[1])-p.δ)*s[1] + exp(s[2]) * s[1]^p.α - 1e-10
 )
-utility(c,p) = c^(1-p.γ)/(1-p.γ)
-v0(s,p) = utility(s[1],p)
+v0(s,p) = ((s[1])^(1-p.γ) + 1.0)^(1/(1-p.γ))
 
 function init(p, n; m=3)
     

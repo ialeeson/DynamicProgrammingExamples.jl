@@ -1,12 +1,12 @@
-module CakeEatingProblem
+module CakeEatingProblemPrecompute
 
 using DynamicProgrammingGPU
 
 @kwdef struct Parameters{F} <: ModelParameters
-    β::F = 0.99
-    γ::F = 1.5
-    min::F = 1e-2
-    max::F = 1e3
+    β::F = 0.95
+    γ::F = 1.2
+    min::F = 1e-3
+    max::F = 1e2
 end
 
 utility(c,p) = c^(1-p.γ)/(1-p.γ)
@@ -16,7 +16,7 @@ v0(s,p) = utility(s[1],p)
 
 function init(p, n)
 
-    grid = Grid((p.min,), (p.max,), n)
+    grid = Grid((p.min,), (p.max,), (n[1],))
     prob = ValueFunction(
         UnivariateOptimizationProblem(
             f,
@@ -24,6 +24,7 @@ function init(p, n)
             GoldenSection()
         ),
         Val(3),
+        MarkovIdentity(n[2])
     )
     DynamicProgrammingGPU.init(prob, grid, Base.Fix2(v0,p))
 
